@@ -9,7 +9,7 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="http://192.168.0.20:8080/auth/js/keycloak.js"></script>
+        <script src="http://kktest:8080/auth/js/keycloak.js"></script>
         <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue"></script>
         <link href="main.css" rel="stylesheet" type="text/css"/>
@@ -22,55 +22,95 @@ and open the template in the editor.
                 Заголовок всплывающего окна <span class="closer">X</span>
             </div>
             <div class="popup_content">
-                <div id="user_id"></div>
+                <div id="user_id">
+                    <ol>
+                        <li v-for="item in listItem"><div v-on:click="itemClick">{{ item.text }}</div></li>
+                    </ol>
+                </div>
+
             </div>
         </div>
-        <p id="test"></p>
+        <div id="app">
+            <p  v-on:click="itemClick">{{ message }}</p>
+        </div
     </body>
     <script>
-        var keycloak = Keycloak();
-        var userid;
-        keycloak.init({onLoad: 'login-required'}).success(function (authenticated) {
-            var token = keycloak.token;
-            console.log(keycloak);
-            console.log(keycloak.idTokenParsed.sub);
+var keycloak = Keycloak();
+var userid;
+console.log(window.location.href);
+var parser = document.createElement('a');
+parser.href = window.location.href;
+console.log(parser.hash);
+var rs = parser.hash.split("&");
+console.log(rs);
 
-            $.ajax({
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                url: "http://192.168.0.20:8080/adminRest_b2b/api/realms/videomanager/users/" + keycloak.idTokenParsed.sub,
-                method: 'GET'
-            }).then(function (data) {
-                console.log(data);
-                for (var key in data.attributes) {
-                    if (/id_app_1/i.test(key)) {
-                        console.log("key = " + key + " val = " + data.attributes[key]);                        
-                        var t = $("<div>");
-                        t.attr("id", key);
-                        t.html(data.attributes[key]);
-                        t.data(data.attributes[key]);
-                        $("#user_id").append(t);
-                        $('#' + key).on("click", function () {
-                            console.log($(this).data());
-                            userid = $(this).data();
-                        });
+keycloak.init({onLoad: 'login-required'}).success(function (authenticated) {
+    var token = keycloak.token;
+    console.log(keycloak);
+    console.log(keycloak.idTokenParsed.sub);
+    var app = new Vue({
+        el: '#app',
+        data: {
+            message: '0'
+        },
+        methods: {
+            itemClick: function (event) {
+                console.log(event);
+            }
+        }
+    });
 
-                    }
-                }
-                
+    var appList = new Vue({
+        el: "#user_id",
+        data: {listItem: []},
+        methods: {
+            itemClick: function (event) {
+                userid = event.toElement.childNodes[0].data;
+                app._data.message = userid;
+            }
+        }
+    });
 
-                console.log(userid);
+    console.log(app);
+    $.ajax({
+        headers: {
+            'Authorization': 'Bearer ' + token
+        },
+        url: "http://kktest:8080/adminRest_b2b/api/realms/videomanager/users/" + keycloak.idTokenParsed.sub,
+        method: 'GET'
+    }).then(function (data) {
+        console.log(data);
+        var temp_arr = [];
+        for (var key in data.attributes) {
+            if (/id_app_1/i.test(key)) {
+                console.log("key = " + key + " val = " + data.attributes[key]);
+                var temp = {text: data.attributes[key][0]};
+                console.log(temp);
 
-                $('.closer,.popup_overlay').click(function () {
-                    console.log(userid[0]);
-                    $("#test").html('<p>' + userid[0] + "</p>");
-                    $('.popup,.popup_overlay').fadeOut(400); //скрываем всплывающее окно
-                });
-                $('.popup,.popup_overlay').fadeIn(400);
-            });
-        }).error(function () {
-            console.log('failed to initialize');
+                temp_arr.push(temp);
+                /*var t = $("<div>");
+                 t.attr("id", key);
+                 t.html(data.attributes[key]);
+                 t.data(data.attributes[key]);
+                 $("#user_id").append(t);
+                 $('#' + key).on("click", function () {
+                 console.log($(this).data());
+                 userid = $(this).data();
+                 app._data.message = userid[0];
+                 });*/
+            }
+        }
+        appList._data.listItem = temp_arr;
+        console.log(appList);
+        $('.closer,.popup_overlay').click(function () {
+//console.log(userid[0]);
+//$("#test").html('<p>' + userid[0] + "</p>");
+            $('.popup,.popup_overlay').fadeOut(400); //скрываем всплывающее окно
         });
+        $('.popup,.popup_overlay').fadeIn(400);
+    });
+}).error(function () {
+    console.log('failed to initialize');
+});
     </script>    
 </html>

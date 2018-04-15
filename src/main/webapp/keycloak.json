@@ -1,9 +1,7 @@
 {
-  "realm": "videomanager",
-  "auth-server-url": "http://192.168.0.20:8080/auth",
-  "ssl-required": "external",
-  "resource": "b2btest",
-  "credentials": {
-    "secret": "a037fce3-415f-4656-be9f-886f73005aa1"
-  }
+    "realm": "videomanager",
+    "auth-server-url": "http://kktest:8080/auth",
+    "ssl-required": "external",
+    "resource": "b2btest",
+    "enable-cors": true
 }

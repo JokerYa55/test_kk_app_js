@@ -32,7 +32,7 @@
     cursor: pointer;
 }
 
-#user_id div:hover
+#user_id li:hover
 {
     background: #ffffcc;
 }
